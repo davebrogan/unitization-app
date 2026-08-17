@@ -48,7 +48,7 @@ graph TD
 
 ## Tasks
 
-- [ ] 1. Create solution file and repository baseline
+- [x] 1. Create solution file and repository baseline
   - Create `RehearsalForecast.sln` at repo root (empty solution targeting .NET 10 layout).
   - Add a .NET-appropriate `.gitignore` at repo root (bin/, obj/, .vs/, .vscode/*.user, TestResults/, publish/, terraform state/plan files).
   - Do not add any package references yet.
