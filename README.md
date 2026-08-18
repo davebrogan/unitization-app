@@ -8,6 +8,7 @@ Inputs are captured through a server-rendered form. All calculations run inside 
 
 ## Table of contents
 
+- [Quick start (macOS)](#quick-start-macos)
 - [Business purpose](#business-purpose)
 - [The target price: `Flat_Price_Per_Sqft` vs `Monthly_Price_Per_Sqft`](#the-target-price-flat_price_per_sqft-vs-monthly_price_per_sqft)
 - [Financial formulas](#financial-formulas)
@@ -24,6 +25,69 @@ Inputs are captured through a server-rendered form. All calculations run inside 
 - [Terraform validation](#terraform-validation)
 - [Deployment status and future direction](#deployment-status-and-future-direction)
 - [Limitations of this phase](#limitations-of-this-phase)
+
+---
+
+## Quick start (macOS)
+
+If you're on macOS (Intel or Apple Silicon), a bootstrap script installs everything you need — Homebrew, Git, the exact .NET 10 SDK pinned in `global.json`, Docker Desktop, and Terraform.
+
+```bash
+# 1. Clone and enter the project.
+git clone <this-repo-url>
+cd unitization-app
+
+# 2. Install every dependency (idempotent — safe to re-run).
+./scripts/install-mac-deps.sh
+
+# 3. Open a new terminal, or reload the shell profile the script updated:
+source ~/.zshrc
+```
+
+Once dependencies are in place, choose one of the three run paths below. All commands are run from the `unitization-app/` directory (the one containing `RehearsalForecast.sln`).
+
+### Option A — Run locally with the .NET CLI
+
+Best for iterative development and debugging.
+
+```bash
+dotnet restore RehearsalForecast.sln
+dotnet run --project src/RehearsalForecast.Web
+```
+
+The listener URL is printed on startup (typically `http://localhost:5000`). Open it in a browser to reach the input form.
+
+### Option B — Run in Docker
+
+Best for reproducing the exact production runtime environment.
+
+```bash
+docker build -t rehearsal-forecast:local .
+docker run --rm -p 8080:8080 --name rehearsal-forecast rehearsal-forecast:local
+```
+
+Then open <http://localhost:8080/>. To stop, press `Ctrl+C` (or `docker stop rehearsal-forecast` from another terminal if you dropped the `--rm` and ran it detached with `-d`).
+
+The image is multi-stage: `mcr.microsoft.com/dotnet/sdk:10.0` for build, `mcr.microsoft.com/dotnet/aspnet:10.0` for runtime. It runs as the non-root `app` user, listens on `${PORT:-8080}`, and embeds no secrets.
+
+### Option C — Run the test suite
+
+```bash
+dotnet test RehearsalForecast.sln -c Release
+```
+
+Runs the full xUnit + FsCheck.Xunit test suite (property tests execute at least 100 iterations each).
+
+### Using the app
+
+Once the app is running (Option A or B), the input page appears at the printed URL. Fill in the eight sections (Capital, Marketing, Operations, Building, Loan, Taxes, Owner Activity, Forecast Controls) and click **Calculate**. The results page shows `Flat_Price_Per_Sqft` plus the 36-month monthly forecast table, and offers an **Export CSV** button. See [Using the application](#using-the-application) for the field-by-field walkthrough.
+
+### Troubleshooting
+
+- **`dotnet` not found after running the script.** The script appends `DOTNET_ROOT` and PATH to `~/.zshrc`. Open a new terminal or run `source ~/.zshrc`.
+- **`docker: command not found`.** Docker Desktop was installed but has never been launched. Open Docker Desktop from Applications once so it can register its CLI shims and start its background service.
+- **`SDK not found` when running `dotnet` commands.** `global.json` pins the SDK to a specific 10.0 preview build. Re-run `./scripts/install-mac-deps.sh` — it detects the pinned version from `global.json` and installs it into `~/.dotnet` if missing.
+- **Port 8080 already in use.** Change the host mapping: `docker run --rm -p 9090:8080 rehearsal-forecast:local` and browse to <http://localhost:9090/>.
 
 ---
 
@@ -314,6 +378,8 @@ unitization-app/
 ## Installing .NET 10
 
 The solution targets **.NET 10** (see `global.json`). Install the SDK from the official Microsoft download page.
+
+> **macOS shortcut:** run `./scripts/install-mac-deps.sh` — see [Quick start (macOS)](#quick-start-macos). It reads the exact SDK version from `global.json` and installs it via the official Microsoft `dotnet-install.sh` script, alongside Docker Desktop and Terraform.
 
 **macOS (Homebrew):**
 
