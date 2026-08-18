@@ -35,6 +35,38 @@
 @{
     ViewData["Title"] = "Inputs";
     var exportError = ViewData[ForecastController.ExportErrorTempDataKey] as string;
+
+    // Tab routing.
+    //
+    // The 8 numbered sections are rendered as CSS-only tabs (no JavaScript).
+    // All 8 tab-panel sections stay in the DOM so a single form POST carries
+    // every field. If validation failed on the previous submit, we jump the
+    // user to the earliest tab that has an errored field so they can see
+    // and fix it without hunting; tabs with errors are also badged in the
+    // nav.
+    var tabDefinitions = new (int Tab, string Prefix, string Slug, string Title)[]
+    {
+        (1, "Capital",          "capital",           "Capital"),
+        (2, "Marketing",        "marketing",         "Marketing"),
+        (3, "Operations",       "operations",        "Operations"),
+        (4, "Building",         "building",          "Building"),
+        (5, "Loan",             "loan",              "Loan"),
+        (6, "Taxes",            "taxes",             "Taxes"),
+        (7, "OwnerActivity",    "owner-activity",    "Owner Activity"),
+        (8, "ForecastControls", "forecast-controls", "Forecast Controls"),
+    };
+    var erroredTabs = new HashSet<int>();
+    if (!ViewData.ModelState.IsValid)
+    {
+        foreach (var (tab, prefix, _, _) in tabDefinitions)
+        {
+            var hasError = ViewData.ModelState.Keys.Any(k =>
+                (k == prefix || k.StartsWith(prefix + ".", StringComparison.Ordinal))
+                && ViewData.ModelState[k]?.Errors.Count > 0);
+            if (hasError) { erroredTabs.Add(tab); }
+        }
+    }
+    var initialTab = erroredTabs.Count > 0 ? erroredTabs.Min() : 1;
 }
 
 <h1>Rehearsal Forecast — Inputs</h1>
@@ -59,9 +91,37 @@
       novalidate>
     @Html.AntiForgeryToken()
 
+    @* ---- Tab controls (CSS-only, no JS) ---------------------------
+       Eight hidden radio inputs drive the visibility of the eight panels
+       below via `:checked ~ #panel-X` sibling selectors in site.css.
+       Every panel remains in the DOM so a single `<button>Calculate</button>`
+       at the bottom of the form submits every field. Keyboard users can
+       arrow between tabs (native radio-group behaviour); the focused
+       radio's label receives a visible focus ring via the CSS
+       `:focus-visible ~ .tab-nav label[for="tab-N"]` rule. *@
+    @foreach (var (tab, _, _, _) in tabDefinitions)
+    {
+        <input type="radio"
+               name="__tab"
+               id="@($"tab-{tab}")"
+               class="tab-radio"
+               value="@tab"
+               checked="@(initialTab == tab ? "checked" : null)" />
+    }
+
+    <nav class="tab-nav" aria-label="Input sections">
+        @foreach (var (tab, _, _, title) in tabDefinitions)
+        {
+            var labelClass = erroredTabs.Contains(tab)
+                ? "tab-nav__label tab-nav__label--errored"
+                : "tab-nav__label";
+            <label for="@($"tab-{tab}")" class="@labelClass">@title</label>
+        }
+    </nav>
+
     @* ---- Section 1: Capital ---------------------------------------- *@
-    <section class="section" aria-labelledby="section-capital">
-        <h2 id="section-capital">1. Capital</h2>
+    <section class="section tab-panel" id="panel-capital" role="tabpanel" aria-labelledby="section-capital">
+        <h2 id="section-capital">Capital</h2>
         <p class="form-hint">
             One-time capital outlays booked as Month 1 expenditures. The sum of
             these four fields is <em>Total_Capital</em>; that summary value and
@@ -110,8 +170,8 @@
     </section>
 
     @* ---- Section 2: Marketing -------------------------------------- *@
-    <section class="section" aria-labelledby="section-marketing">
-        <h2 id="section-marketing">2. Marketing</h2>
+    <section class="section tab-panel" id="panel-marketing" role="tabpanel" aria-labelledby="section-marketing">
+        <h2 id="section-marketing">Marketing</h2>
         <p class="form-hint">
             Four marketing line items. Each may be entered as a single constant
             applied to every month, or as an explicit 36-month schedule.
@@ -139,8 +199,8 @@
     </section>
 
     @* ---- Section 3: Operations ------------------------------------- *@
-    <section class="section" aria-labelledby="section-operations">
-        <h2 id="section-operations">3. Operations</h2>
+    <section class="section tab-panel" id="panel-operations" role="tabpanel" aria-labelledby="section-operations">
+        <h2 id="section-operations">Operations</h2>
         <p class="form-hint">
             Fourteen operational line items. Each may be entered as a constant
             or a 36-month schedule. <em>Payroll_Tax</em> is derived from
@@ -220,8 +280,8 @@
     </section>
 
     @* ---- Section 4: Building --------------------------------------- *@
-    <section class="section" aria-labelledby="section-building">
-        <h2 id="section-building">4. Building</h2>
+    <section class="section tab-panel" id="panel-building" role="tabpanel" aria-labelledby="section-building">
+        <h2 id="section-building">Building</h2>
         <p class="form-hint">
             Building geometry, the depreciable cost, and the occupancy
             schedule. Derived values <em>Rentable_Sqft</em>,
@@ -308,8 +368,8 @@
     </section>
 
     @* ---- Section 5: Loan ------------------------------------------- *@
-    <section class="section" aria-labelledby="section-loan">
-        <h2 id="section-loan">5. Loan</h2>
+    <section class="section tab-panel" id="panel-loan" role="tabpanel" aria-labelledby="section-loan">
+        <h2 id="section-loan">Loan</h2>
         <p class="form-hint">
             Interest rate and term. <em>Loan_Proceeds</em>,
             <em>Monthly_Loan_Interest</em>, and
@@ -340,8 +400,8 @@
     </section>
 
     @* ---- Section 6: Taxes ------------------------------------------ *@
-    <section class="section" aria-labelledby="section-taxes">
-        <h2 id="section-taxes">6. Taxes</h2>
+    <section class="section tab-panel" id="panel-taxes" role="tabpanel" aria-labelledby="section-taxes">
+        <h2 id="section-taxes">Taxes</h2>
         <p class="form-hint">
             Only <em>Income_Tax_Rate</em> is a user input.
             <em>Payroll_Tax</em> is derived at the fixed rate 0.0765 applied to
@@ -362,8 +422,8 @@
     </section>
 
     @* ---- Section 7: Owner Activity --------------------------------- *@
-    <section class="section" aria-labelledby="section-owner-activity">
-        <h2 id="section-owner-activity">7. Owner Activity</h2>
+    <section class="section tab-panel" id="panel-owner-activity" role="tabpanel" aria-labelledby="section-owner-activity">
+        <h2 id="section-owner-activity">Owner Activity</h2>
         <p class="form-hint">
             Owner_Investment is a Month 1 cash contribution. Owner_Withdrawals
             is a single constant per-month value applied uniformly to every
@@ -398,8 +458,8 @@
     </section>
 
     @* ---- Section 8: Forecast Controls ------------------------------ *@
-    <section class="section" aria-labelledby="section-forecast-controls">
-        <h2 id="section-forecast-controls">8. Forecast Controls</h2>
+    <section class="section tab-panel" id="panel-forecast-controls" role="tabpanel" aria-labelledby="section-forecast-controls">
+        <h2 id="section-forecast-controls">Forecast Controls</h2>
         <p class="form-hint">
             Opening cash balance and the month by which the business must
             reach a sustained cash-positive state through Month 36.

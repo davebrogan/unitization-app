@@ -326,6 +326,124 @@ a.btn-secondary {
     font-size: 0.8125rem;
 }
 
+/* ---- Tabbed inputs form (Index.cshtml) ------------------------------
+
+   Eight `<input type="radio" name="__tab" class="tab-radio">` inputs are
+   rendered as siblings of the eight `<section class="tab-panel">` panels
+   inside the form. The radios are visually hidden but remain keyboard-
+   focusable, so users can arrow through them; each label acts as the
+   clickable tab affordance.
+
+   `#tab-N:checked ~ #panel-X` sibling selectors reveal exactly one panel
+   at a time. Every panel remains in the DOM so a single submit posts all
+   fields to /Forecast/Calculate — no per-tab navigation buttons, no JS.
+   ------------------------------------------------------------------- */
+
+.tab-radio {
+    /* Off-screen but focusable (Pico's visually-hidden pattern). */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.tab-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0 0 1.5rem 0;
+    padding: 0;
+    border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.tab-nav__label {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-top-left-radius: var(--pico-border-radius);
+    border-top-right-radius: var(--pico-border-radius);
+    cursor: pointer;
+    color: var(--pico-muted-color);
+    background-color: transparent;
+    font-weight: 500;
+    user-select: none;
+    /* Overlap the nav's bottom border by 1px so the active tab reads as
+       "attached" to its panel. */
+    position: relative;
+    top: 1px;
+}
+
+.tab-nav__label:hover {
+    color: var(--pico-color);
+    background-color: var(--pico-card-sectioning-background-color, var(--pico-background-color));
+}
+
+.tab-nav__label--errored {
+    color: var(--pico-del-color, #b3261e);
+}
+
+.tab-nav__label--errored::after {
+    content: " !";
+    font-weight: 700;
+}
+
+.tab-panel {
+    display: none;
+}
+
+/* Reveal the panel whose sibling radio is checked. */
+#tab-1:checked ~ #panel-capital,
+#tab-2:checked ~ #panel-marketing,
+#tab-3:checked ~ #panel-operations,
+#tab-4:checked ~ #panel-building,
+#tab-5:checked ~ #panel-loan,
+#tab-6:checked ~ #panel-taxes,
+#tab-7:checked ~ #panel-owner-activity,
+#tab-8:checked ~ #panel-forecast-controls {
+    display: block;
+}
+
+/* Style the label of the currently-checked tab as "active". */
+#tab-1:checked ~ .tab-nav label[for="tab-1"],
+#tab-2:checked ~ .tab-nav label[for="tab-2"],
+#tab-3:checked ~ .tab-nav label[for="tab-3"],
+#tab-4:checked ~ .tab-nav label[for="tab-4"],
+#tab-5:checked ~ .tab-nav label[for="tab-5"],
+#tab-6:checked ~ .tab-nav label[for="tab-6"],
+#tab-7:checked ~ .tab-nav label[for="tab-7"],
+#tab-8:checked ~ .tab-nav label[for="tab-8"] {
+    background-color: var(--pico-card-background-color);
+    color: var(--pico-primary);
+    border-color: var(--pico-muted-border-color);
+    border-bottom-color: var(--pico-card-background-color);
+}
+
+/* Keyboard focus indicator on the label associated with the focused radio. */
+#tab-1:focus-visible ~ .tab-nav label[for="tab-1"],
+#tab-2:focus-visible ~ .tab-nav label[for="tab-2"],
+#tab-3:focus-visible ~ .tab-nav label[for="tab-3"],
+#tab-4:focus-visible ~ .tab-nav label[for="tab-4"],
+#tab-5:focus-visible ~ .tab-nav label[for="tab-5"],
+#tab-6:focus-visible ~ .tab-nav label[for="tab-6"],
+#tab-7:focus-visible ~ .tab-nav label[for="tab-7"],
+#tab-8:focus-visible ~ .tab-nav label[for="tab-8"] {
+    outline: 2px solid var(--pico-primary);
+    outline-offset: 2px;
+}
+
+/* Panels' first heading looks slightly less shouty since the tab already
+   announces which section is active. */
+.tab-panel > h2:first-of-type {
+    margin-top: 0;
+}
+
 /* Utility: expose content to assistive tech while hiding it visually. */
 .visually-hidden {
     position: absolute;
