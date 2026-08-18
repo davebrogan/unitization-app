@@ -60,6 +60,11 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+# Developer-local variable values may hold real project IDs / SA emails
+# (design §16.8, Requirement 23.8). Keep the .example file tracked.
+terraform.tfvars
+*.auto.tfvars
+*.auto.tfvars.json
 
 # -----------------------------------------------------------------------------
 # Docker
@@ -95,3 +100,5 @@ appsettings.*.local.json
 secrets.json
 .env
 .env.*
+
+.fake
