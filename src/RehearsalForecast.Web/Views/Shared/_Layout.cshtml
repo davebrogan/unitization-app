@@ -9,7 +9,12 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
     <title>@fullTitle</title>
+    @* Pico CSS v2.1.1 — modern semantic styling for native HTML elements
+       (typography, buttons, inputs, tables, focus states, light/dark themes).
+       Loaded first so app-specific rules in site.css can override it. *@
+    <link rel="stylesheet" href="~/css/vendor/pico.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>

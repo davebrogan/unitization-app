@@ -1,81 +1,36 @@
 /* -----------------------------------------------------------------------
-   Rehearsal Forecast — starter stylesheet (design §13.5).
+   Rehearsal Forecast — app-specific stylesheet.
 
-   This file establishes baseline typography, section headers, and form
-   spacing so the eight-section input page (Requirement 17.1) and the
-   results page (design §13.3) render legibly without any client-side
-   JavaScript. Table-specific styling (sticky headers, horizontal scroll)
-   is added in task 63.
+   Base typography, form controls, buttons, tables, focus states, and
+   light/dark theming are provided by Pico CSS v2.1.1 (loaded first in
+   _Layout.cshtml). This file only contains rules for app-specific
+   components that Pico does not cover:
+
+     * Site chrome (header bar, main container, footer)
+     * Section cards on the inputs and results pages
+     * Results hero (two-card price display)
+     * Summary grid (definition lists on the results page)
+     * Monthly schedule editor (Constant / Variable subforms + 12-column grid)
+     * Sticky 36-row forecast table
+     * Validation and alert styling that layers over Pico defaults
+
+   Design tokens from Pico are consumed via CSS custom properties
+   (--pico-primary, --pico-muted-color, etc.) so this stylesheet
+   automatically inherits Pico's light and dark themes.
    ----------------------------------------------------------------------- */
 
-/* ---- Reset & base --------------------------------------------------- */
+/* ---- Site chrome ---------------------------------------------------- */
 
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-}
-
-html {
-    font-size: 16px;
-}
-
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, sans-serif;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #1f2933;
-    background-color: #f7f8fa;
-}
-
-/* ---- Typography ----------------------------------------------------- */
-
-h1,
-h2,
-h3,
-h4 {
-    margin: 0 0 0.5rem 0;
-    font-weight: 600;
-    line-height: 1.25;
-    color: #1a2733;
-}
-
-h1 {
-    font-size: 1.75rem;
-}
-
-h2 {
-    font-size: 1.375rem;
-    margin-top: 1.5rem;
-}
-
-h3 {
-    font-size: 1.125rem;
-    margin-top: 1.25rem;
-}
-
-p {
-    margin: 0 0 1rem 0;
-}
-
-a {
-    color: #1a56b0;
-    text-decoration: none;
-}
-
-a:hover,
-a:focus {
-    text-decoration: underline;
-}
-
-/* ---- Layout shell --------------------------------------------------- */
+/*
+   Pico sizes <body>, <main>, etc. Our site header/footer sit outside
+   Pico's default main container so we give them their own width rules.
+*/
 
 .site-header {
-    background-color: #1a2733;
-    color: #fff;
+    background-color: var(--pico-primary-background);
+    color: var(--pico-primary-inverse);
     padding: 0.75rem 0;
+    margin-bottom: 1rem;
 }
 
 .site-header__inner,
@@ -86,55 +41,62 @@ a:focus {
 }
 
 .site-header__brand {
-    color: #fff;
+    color: var(--pico-primary-inverse);
     font-size: 1.125rem;
     font-weight: 600;
     text-decoration: none;
 }
 
+.site-header__brand:hover,
+.site-header__brand:focus {
+    color: var(--pico-primary-inverse);
+    text-decoration: underline;
+}
+
 .site-main {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1.5rem 1.25rem 3rem 1.25rem;
+    padding: 1rem 1.25rem 3rem 1.25rem;
 }
 
 .site-footer {
-    border-top: 1px solid #e1e5eb;
-    background-color: #fff;
+    border-top: 1px solid var(--pico-muted-border-color);
+    background-color: var(--pico-background-color);
     padding: 1rem 0;
-    color: #5a6472;
+    color: var(--pico-muted-color);
     font-size: 0.875rem;
+    margin-top: 2rem;
 }
 
-/* ---- Section headers ------------------------------------------------ */
+/* ---- Section cards -------------------------------------------------- */
+
+/*
+   Each input group and results block is wrapped in .section. Pico gives
+   us <article> semantics as an alternative but the existing markup uses
+   <section class="section"> so we style it explicitly.
+*/
 
 .section {
-    background-color: #fff;
-    border: 1px solid #e1e5eb;
-    border-radius: 6px;
+    background-color: var(--pico-card-background-color);
+    border: 1px solid var(--pico-muted-border-color);
+    border-radius: var(--pico-border-radius);
     padding: 1.25rem 1.5rem;
     margin-bottom: 1.5rem;
+    box-shadow: var(--pico-card-box-shadow);
 }
 
-.section > h2,
-.section-header {
+.section > h2 {
     margin-top: 0;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid #e1e5eb;
-    color: #1a2733;
-    font-size: 1.25rem;
-    font-weight: 600;
+    border-bottom: 1px solid var(--pico-muted-border-color);
 }
 
 /* ---- Form spacing --------------------------------------------------- */
 
-.form-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 0.5rem 1rem;
-    margin-bottom: 1rem;
-}
+/*
+   Pico handles the input rendering itself; we only manage per-field
+   spacing and the two-column form-label / input stack.
+*/
 
 .form-field {
     display: flex;
@@ -143,43 +105,23 @@ a:focus {
     max-width: 22rem;
 }
 
-.form-field label,
+.form-field > input,
+.form-field > select,
+.form-field > textarea {
+    margin-bottom: 0;
+}
+
 .form-label {
     display: inline-block;
     margin-bottom: 0.25rem;
     font-weight: 500;
-    color: #1f2933;
-}
-
-.form-field input[type="text"],
-.form-field input[type="number"],
-.form-field input[type="email"],
-.form-field select,
-.form-field textarea,
-input[type="text"],
-input[type="number"] {
-    padding: 0.375rem 0.5rem;
-    border: 1px solid #c5ccd6;
-    border-radius: 4px;
-    font-size: 1rem;
-    line-height: 1.5;
-    background-color: #fff;
-    color: #1f2933;
-}
-
-.form-field input:focus,
-input:focus,
-select:focus,
-textarea:focus {
-    outline: 2px solid #1a56b0;
-    outline-offset: 1px;
-    border-color: #1a56b0;
+    color: var(--pico-color);
 }
 
 .form-hint {
     display: block;
     margin-top: 0.25rem;
-    color: #5a6472;
+    color: var(--pico-muted-color);
     font-size: 0.875rem;
 }
 
@@ -188,41 +130,32 @@ textarea:focus {
     display: flex;
     gap: 0.75rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
-button,
-.btn {
+/* Anchors used as buttons (Pico convention). */
+a.btn,
+a.btn-secondary {
     display: inline-block;
-    padding: 0.5rem 1.25rem;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    font-size: 1rem;
-    font-weight: 500;
-    line-height: 1.5;
-    cursor: pointer;
-    background-color: #1a56b0;
-    color: #fff;
+    text-decoration: none;
 }
 
-button:hover,
-.btn:hover {
-    background-color: #144a99;
-}
-
-button:focus,
-.btn:focus {
-    outline: 2px solid #0b3a80;
-    outline-offset: 1px;
+/* Legacy .btn / .btn-secondary alias to Pico's default & .secondary. */
+.btn {
+    /* Native <button> already picks up Pico's primary styling. */
+    margin-bottom: 0;
 }
 
 .btn-secondary {
-    background-color: #fff;
-    color: #1a56b0;
-    border-color: #1a56b0;
+    background-color: transparent;
+    color: var(--pico-secondary);
+    border: 1px solid var(--pico-secondary);
 }
 
-.btn-secondary:hover {
-    background-color: #eef4fc;
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: var(--pico-secondary);
+    color: var(--pico-secondary-inverse);
 }
 
 /* ---- Validation ----------------------------------------------------- */
@@ -230,13 +163,13 @@ button:focus,
 .validation-summary,
 .field-validation-error,
 .validation-summary-errors {
-    color: #b3261e;
+    color: var(--pico-del-color, #b3261e);
 }
 
 .validation-summary {
-    background-color: #fdecea;
-    border: 1px solid #f5c2be;
-    border-radius: 4px;
+    background-color: color-mix(in srgb, var(--pico-del-color, #b3261e) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--pico-del-color, #b3261e) 40%, transparent);
+    border-radius: var(--pico-border-radius);
     padding: 0.75rem 1rem;
     margin-bottom: 1.5rem;
 }
@@ -257,16 +190,16 @@ button:focus,
 }
 
 .input-validation-error {
-    border-color: #b3261e;
-    background-color: #fef7f6;
+    border-color: var(--pico-del-color, #b3261e) !important;
+    background-color: color-mix(in srgb, var(--pico-del-color, #b3261e) 6%, transparent);
 }
 
-/* ---- Alerts (solver failure banner, export-error banner) ----------- */
+/* ---- Alerts (solver failure, export-error banners) ----------------- */
 
 .alert {
     padding: 0.75rem 1rem;
     border: 1px solid transparent;
-    border-radius: 4px;
+    border-radius: var(--pico-border-radius);
     margin-bottom: 1.5rem;
 }
 
@@ -282,14 +215,31 @@ button:focus,
     border-color: #f5c2be;
 }
 
-/* ---- Monthly schedule editor (design §13.2) ------------------------- */
+.alert__message {
+    margin: 0.5rem 0 0.25rem 0;
+}
 
-/*
-   Visual language for _MonthlyScheduleEditor.cshtml. R1.5 requires the
-   currently selected mode to be visually distinguishable; the active mode
-   label gets `.active-label` styling and the active subform gets a subtle
-   background shade.
-*/
+.alert__hint {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9375rem;
+    color: inherit;
+    opacity: 0.85;
+}
+
+@media (prefers-color-scheme: dark) {
+    .alert-warning {
+        color: #ffd682;
+        background-color: #3a2d00;
+        border-color: #6b5300;
+    }
+    .alert-error {
+        color: #ffb0a8;
+        background-color: #3a0f0b;
+        border-color: #6b1e18;
+    }
+}
+
+/* ---- Monthly schedule editor (design §13.2) ------------------------- */
 
 .monthly-schedule-editor {
     margin: 0.75rem 0 1rem 0;
@@ -309,27 +259,29 @@ button:focus,
     gap: 0.375rem;
     padding: 0.25rem 0.5rem;
     border: 1px solid transparent;
-    border-radius: 4px;
-    color: #5a6472;
+    border-radius: var(--pico-border-radius);
+    color: var(--pico-muted-color);
     font-weight: 500;
     cursor: pointer;
+    margin-bottom: 0;
 }
 
 .schedule-mode-label.active-label {
-    color: #1a2733;
-    background-color: #eef4fc;
-    border-color: #c5d8f0;
+    color: var(--pico-primary);
+    background-color: var(--pico-primary-background);
+    border-color: var(--pico-primary-border);
+    color: var(--pico-primary-inverse);
 }
 
 .schedule-subform {
     padding: 0.5rem 0.75rem;
     border: 1px solid transparent;
-    border-radius: 4px;
+    border-radius: var(--pico-border-radius);
 }
 
 .schedule-subform--active {
-    background-color: #f4f7fb;
-    border-color: #dbe4f0;
+    background-color: var(--pico-card-sectioning-background-color, var(--pico-background-color));
+    border-color: var(--pico-muted-border-color);
 }
 
 .schedule-monthly-grid {
@@ -348,17 +300,20 @@ button:focus,
 .schedule-monthly-grid__cell {
     max-width: none;
     margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .schedule-monthly-grid__cell input[type="number"] {
     width: 100%;
     padding: 0.25rem 0.375rem;
     font-size: 0.9375rem;
+    margin-bottom: 0;
 }
 
 .form-label--month {
     font-size: 0.8125rem;
-    color: #5a6472;
+    color: var(--pico-muted-color);
     margin-bottom: 0.125rem;
     font-weight: 500;
 }
@@ -384,13 +339,7 @@ button:focus,
     border: 0;
 }
 
-/* ---- Results page: hero, summary, export (design §13.3) ------------- */
-
-/*
-   Prominent price display (R16.1, R16.2, R16.6). Two side-by-side cards on
-   wide viewports collapse to a single column on narrow viewports. No client-
-   side JS; layout is CSS-only via grid + `minmax(0, 1fr)` for graceful reflow.
-*/
+/* ---- Results page: hero, summary (design §13.3) --------------------- */
 
 .results-hero__grid {
     display: grid;
@@ -400,22 +349,22 @@ button:focus,
 
 .results-hero__card {
     padding: 1rem 1.25rem;
-    border: 1px solid #dbe4f0;
-    border-radius: 6px;
-    background-color: #f4f7fb;
+    border: 1px solid var(--pico-primary-border);
+    border-radius: var(--pico-border-radius);
+    background-color: var(--pico-primary-background);
+    color: var(--pico-primary-inverse);
 }
 
 .results-hero__label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #5a6472;
+    opacity: 0.85;
     margin-bottom: 0.25rem;
 }
 
 .results-hero__value {
     font-size: 2rem;
     font-weight: 700;
-    color: #1a2733;
     line-height: 1.2;
     font-variant-numeric: tabular-nums;
 }
@@ -423,13 +372,8 @@ button:focus,
 .results-hero__caption {
     margin-top: 0.25rem;
     font-size: 0.8125rem;
-    color: #5a6472;
+    opacity: 0.85;
 }
-
-/*
-   Summary metrics (R16.4) and Cash-Positive block (R16.3, R14.5) render as
-   two-column definition lists: term on the left, value on the right.
-*/
 
 .summary-grid {
     display: grid;
@@ -440,103 +384,74 @@ button:focus,
 }
 
 .summary-grid dt {
-    color: #5a6472;
+    color: var(--pico-muted-color);
     font-weight: 500;
 }
 
 .summary-grid dd {
     margin: 0;
-    color: #1a2733;
+    color: var(--pico-color);
     font-variant-numeric: tabular-nums;
-}
-
-.results-export {
-    /* Export section shares .section styling; no extra rules required. */
 }
 
 /* ---- 36-row detail table (design §13.4, R16.5, R16.7) --------------- */
 
-/*
-   The results table naturally exceeds any viewport width. `.table-scroll`
-   provides horizontal scrolling on narrow viewports so all 29 columns
-   remain readable (R16.7). `-webkit-overflow-scrolling: touch` enables
-   momentum scrolling on iOS.
-
-   Layering (z-index):
-     * thead th          — sticky top,   z-index 2
-     * tbody first cell  — sticky left,  z-index 1
-     * thead first th    — top-left,     z-index 3 (above both)
-*/
-
 .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    /*
-       Guard against tables being clipped visually inside the .section card.
-       The wrapper spans the section's full inner width; horizontal scroll
-       kicks in only when the table exceeds that width.
-    */
     max-width: 100%;
+    border-radius: var(--pico-border-radius);
+    border: 1px solid var(--pico-muted-border-color);
 }
 
 .forecast-table {
     border-collapse: collapse;
     white-space: nowrap;
-    /*
-       Do not force a table width. Let the natural sum of column widths
-       determine the table's rendered size so `.table-scroll` scrolls when
-       needed and every column stays readable without truncation.
-    */
+    margin-bottom: 0;
+    width: auto;
 }
 
 .forecast-table th,
 .forecast-table td {
     padding: 0.375rem 0.625rem;
-    border-bottom: 1px solid #e1e5eb;
+    border-bottom: 1px solid var(--pico-muted-border-color);
     text-align: right;
     font-variant-numeric: tabular-nums;
+    background-color: var(--pico-card-background-color);
 }
 
 .forecast-table thead th {
     text-align: right;
     font-weight: 600;
-    color: #1a2733;
-    background-color: #f0f3f8;
-    border-bottom: 2px solid #c5ccd6;
+    color: var(--pico-color);
+    background-color: var(--pico-card-sectioning-background-color, var(--pico-background-color));
+    border-bottom: 2px solid var(--pico-muted-border-color);
     position: sticky;
     top: 0;
     z-index: 2;
 }
 
-/* Sticky first column ("Month") so it stays visible while scrolling horizontally. */
+/* Sticky first column ("Month"). */
 .forecast-table th:first-child,
 .forecast-table td:first-child {
     position: sticky;
     left: 0;
-    background: #fff;
     text-align: left;
     font-weight: 600;
-    /* Subtle right divider so the sticky column visually detaches from
-       the horizontally scrolling body. */
-    border-right: 1px solid #e1e5eb;
+    border-right: 1px solid var(--pico-muted-border-color);
     z-index: 1;
+    background-color: var(--pico-card-background-color);
 }
 
-/* Top-left header cell must stack above both the sticky header row
-   and the sticky first column. */
+/* Top-left header cell above both stickies. */
 .forecast-table thead th:first-child {
-    background-color: #f0f3f8;
+    background-color: var(--pico-card-sectioning-background-color, var(--pico-background-color));
     z-index: 3;
 }
 
-/* Zebra striping keeps 36 numeric rows scannable. Applies to non-sticky
-   cells; sticky first column retains its solid background so it does not
-   bleed the stripe through the horizontally scrolling content behind it. */
-.forecast-table tbody tr:nth-child(even) td {
-    background-color: #fafbfd;
-}
-
+/* Zebra striping. */
+.forecast-table tbody tr:nth-child(even) td,
 .forecast-table tbody tr:nth-child(even) th:first-child,
 .forecast-table tbody tr:nth-child(even) td:first-child {
-    background-color: #fafbfd;
+    background-color: color-mix(in srgb, var(--pico-muted-border-color) 30%, var(--pico-card-background-color));
 }
