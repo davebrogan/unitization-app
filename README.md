@@ -61,12 +61,25 @@ The listener URL is printed on startup (typically `http://localhost:5000`). Open
 
 Best for reproducing the exact production runtime environment.
 
+The easiest path is the wrapper script:
+
+```bash
+./scripts/run-docker.sh          # build if needed, run detached, wait for HTTP 200
+./scripts/run-docker.sh status   # check container state
+./scripts/run-docker.sh logs     # tail logs
+./scripts/run-docker.sh down     # stop and remove
+./scripts/run-docker.sh rebuild  # force a fresh --no-cache build
+HOST_PORT=9090 ./scripts/run-docker.sh   # publish on a different host port
+```
+
+Or run Docker manually if you prefer:
+
 ```bash
 docker build -t rehearsal-forecast:local .
 docker run --rm -p 8080:8080 --name rehearsal-forecast rehearsal-forecast:local
 ```
 
-Then open <http://localhost:8080/>. To stop, press `Ctrl+C` (or `docker stop rehearsal-forecast` from another terminal if you dropped the `--rm` and ran it detached with `-d`).
+Either way, open <http://localhost:8080/>. To stop the manual run press `Ctrl+C` (or `docker stop rehearsal-forecast` if you detached with `-d`).
 
 The image is multi-stage: `mcr.microsoft.com/dotnet/sdk:10.0` for build, `mcr.microsoft.com/dotnet/aspnet:10.0` for runtime. It runs as the non-root `app` user, listens on `${PORT:-8080}`, and embeds no secrets.
 
