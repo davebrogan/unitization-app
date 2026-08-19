@@ -9,28 +9,29 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light dark" />
     <title>@fullTitle</title>
-    @* Pico CSS v2.1.1 — modern semantic styling for native HTML elements
-       (typography, buttons, inputs, tables, focus states, light/dark themes).
-       Loaded first so app-specific rules in site.css can override it. *@
-    <link rel="stylesheet" href="~/css/vendor/pico.min.css" asp-append-version="true" />
+    @* Bootstrap 5.3.3 — modern semantic styling for buttons, forms, tables,
+       alerts, cards, and grid utilities. Loaded first so app-specific rules
+       in site.css can layer over Bootstrap defaults. No Bootstrap JavaScript
+       bundle is loaded because the spec forbids client-side JS; the tabs on
+       the inputs page use a CSS-only radio-button technique. *@
+    <link rel="stylesheet" href="~/css/vendor/bootstrap.min.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    <header class="site-header">
-        <div class="site-header__inner">
-            <a class="site-header__brand" href="@Url.Action("Index", "Forecast")">Rehearsal Forecast</a>
+    <header class="site-header navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="@Url.Action("Index", "Forecast")">Rehearsal Forecast</a>
         </div>
     </header>
 
-    <main class="site-main" role="main">
+    <main class="site-main container py-4" role="main">
         @RenderBody()
     </main>
 
-    <footer class="site-footer">
-        <div class="site-footer__inner">
-            <span>Rehearsal Forecast · 36-month planning tool</span>
+    <footer class="site-footer border-top py-3 mt-4">
+        <div class="container text-muted small">
+            Rehearsal Forecast · 36-month planning tool
         </div>
     </footer>
 </body>

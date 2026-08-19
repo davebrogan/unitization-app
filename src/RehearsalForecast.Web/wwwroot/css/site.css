@@ -1,102 +1,98 @@
 /* -----------------------------------------------------------------------
    Rehearsal Forecast — app-specific stylesheet.
 
-   Base typography, form controls, buttons, tables, focus states, and
-   light/dark theming are provided by Pico CSS v2.1.1 (loaded first in
-   _Layout.cshtml). This file only contains rules for app-specific
-   components that Pico does not cover:
+   Base typography, buttons (.btn), forms (.form-control), tables (.table),
+   alerts, and grid utilities are provided by Bootstrap 5.3.3 (loaded first
+   in _Layout.cshtml). This file only contains rules for app-specific
+   components that Bootstrap does not cover:
 
-     * Site chrome (header bar, main container, footer)
+     * Site header / footer chrome tweaks
+     * Native <input>/<select>/<textarea> styling — the existing markup does
+       not tag every input with .form-control, so we alias native inputs to
+       Bootstrap's form-control appearance via attribute selectors.
      * Section cards on the inputs and results pages
-     * Results hero (two-card price display)
-     * Summary grid (definition lists on the results page)
-     * Monthly schedule editor (Constant / Variable subforms + 12-column grid)
-     * Sticky 36-row forecast table
-     * Validation and alert styling that layers over Pico defaults
-
-   Design tokens from Pico are consumed via CSS custom properties
-   (--pico-primary, --pico-muted-color, etc.) so this stylesheet
-   automatically inherits Pico's light and dark themes.
+     * Tabbed inputs form (CSS-only radios + :checked ~ sibling selectors)
+     * Results hero, summary grid, sticky 36-row forecast table
+     * Monthly schedule editor (Constant / Variable subforms + 12-col grid)
+     * Validation summary and alert styling that layers over Bootstrap
    ----------------------------------------------------------------------- */
+
+/* ---- Native input aliasing to Bootstrap .form-control ---------------
+
+   Rather than tag every one of the ~50 <input type="number"> elements
+   scattered across the eight tabs with class="form-control", we style
+   native inputs directly. This keeps the Razor markup minimal and lets
+   generated inputs (from _MonthlyScheduleEditor and _OccupancyEditor
+   partials) inherit the same look.
+   ------------------------------------------------------------------- */
+
+input[type="text"],
+input[type="number"],
+input[type="email"],
+select:not([class*="form-select"]),
+textarea:not([class*="form-control"]) {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    transition:
+        border-color .15s ease-in-out,
+        box-shadow .15s ease-in-out;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="email"]:focus,
+select:focus,
+textarea:focus {
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Number inputs sized for schedule-grid month cells stay compact.
+   The .schedule-monthly-grid__cell descendant rule below overrides this. */
 
 /* ---- Site chrome ---------------------------------------------------- */
 
-/*
-   Pico sizes <body>, <main>, etc. Our site header/footer sit outside
-   Pico's default main container so we give them their own width rules.
-*/
-
-.site-header {
-    background-color: var(--pico-primary-background);
-    color: var(--pico-primary-inverse);
-    padding: 0.75rem 0;
-    margin-bottom: 1rem;
-}
-
-.site-header__inner,
-.site-footer__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.25rem;
-}
-
-.site-header__brand {
-    color: var(--pico-primary-inverse);
-    font-size: 1.125rem;
+.site-header .navbar-brand {
     font-weight: 600;
-    text-decoration: none;
-}
-
-.site-header__brand:hover,
-.site-header__brand:focus {
-    color: var(--pico-primary-inverse);
-    text-decoration: underline;
-}
-
-.site-main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1rem 1.25rem 3rem 1.25rem;
+    letter-spacing: 0.01em;
 }
 
 .site-footer {
-    border-top: 1px solid var(--pico-muted-border-color);
-    background-color: var(--pico-background-color);
-    padding: 1rem 0;
-    color: var(--pico-muted-color);
-    font-size: 0.875rem;
-    margin-top: 2rem;
+    background-color: var(--bs-body-bg);
 }
 
 /* ---- Section cards -------------------------------------------------- */
 
-/*
-   Each input group and results block is wrapped in .section. Pico gives
-   us <article> semantics as an alternative but the existing markup uses
-   <section class="section"> so we style it explicitly.
-*/
-
 .section {
-    background-color: var(--pico-card-background-color);
-    border: 1px solid var(--pico-muted-border-color);
-    border-radius: var(--pico-border-radius);
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius-lg);
     padding: 1.25rem 1.5rem;
     margin-bottom: 1.5rem;
-    box-shadow: var(--pico-card-box-shadow);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .section > h2 {
     margin-top: 0;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--pico-muted-border-color);
+    border-bottom: 1px solid var(--bs-border-color);
+    font-size: 1.375rem;
+    font-weight: 600;
 }
 
 /* ---- Form spacing --------------------------------------------------- */
-
-/*
-   Pico handles the input rendering itself; we only manage per-field
-   spacing and the two-column form-label / input stack.
-*/
 
 .form-field {
     display: flex;
@@ -115,13 +111,13 @@
     display: inline-block;
     margin-bottom: 0.25rem;
     font-weight: 500;
-    color: var(--pico-color);
+    color: var(--bs-body-color);
 }
 
 .form-hint {
     display: block;
     margin-top: 0.25rem;
-    color: var(--pico-muted-color);
+    color: var(--bs-secondary-color);
     font-size: 0.875rem;
 }
 
@@ -133,29 +129,45 @@
     flex-wrap: wrap;
 }
 
-/* Anchors used as buttons (Pico convention). */
+/* Anchors used as buttons keep no underline. */
 a.btn,
 a.btn-secondary {
-    display: inline-block;
     text-decoration: none;
 }
 
-/* Legacy .btn / .btn-secondary alias to Pico's default & .secondary. */
-.btn {
-    /* Native <button> already picks up Pico's primary styling. */
-    margin-bottom: 0;
+/* Legacy .btn / .btn-secondary aliases to Bootstrap's .btn-primary /
+   .btn-outline-secondary. Existing markup emits just `class="btn"` on the
+   Calculate submit and `class="btn btn-secondary"` on the "Back to inputs"
+   link; we upgrade both here without touching the Razor markup. */
+
+button.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline-secondary),
+input.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline-secondary) {
+    color: var(--bs-btn-color, #fff);
+    background-color: var(--bs-primary, #0d6efd);
+    border-color: var(--bs-primary, #0d6efd);
+}
+
+button.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline-secondary):hover,
+button.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline-secondary):focus,
+input.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline-secondary):hover,
+input.btn:not(.btn-primary):not(.btn-secondary):not(.btn-outline-secondary):focus {
+    color: #fff;
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
 }
 
 .btn-secondary {
+    /* Render Bootstrap's .btn-outline-secondary look regardless of markup. */
+    color: var(--bs-secondary);
     background-color: transparent;
-    color: var(--pico-secondary);
-    border: 1px solid var(--pico-secondary);
+    border-color: var(--bs-secondary, #6c757d);
 }
 
 .btn-secondary:hover,
 .btn-secondary:focus {
-    background-color: var(--pico-secondary);
-    color: var(--pico-secondary-inverse);
+    color: #fff;
+    background-color: var(--bs-secondary, #6c757d);
+    border-color: var(--bs-secondary, #6c757d);
 }
 
 /* ---- Validation ----------------------------------------------------- */
@@ -163,13 +175,13 @@ a.btn-secondary {
 .validation-summary,
 .field-validation-error,
 .validation-summary-errors {
-    color: var(--pico-del-color, #b3261e);
+    color: var(--bs-danger, #dc3545);
 }
 
 .validation-summary {
-    background-color: color-mix(in srgb, var(--pico-del-color, #b3261e) 12%, transparent);
-    border: 1px solid color-mix(in srgb, var(--pico-del-color, #b3261e) 40%, transparent);
-    border-radius: var(--pico-border-radius);
+    background-color: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.35);
+    border-radius: var(--bs-border-radius);
     padding: 0.75rem 1rem;
     margin-bottom: 1.5rem;
 }
@@ -190,30 +202,17 @@ a.btn-secondary {
 }
 
 .input-validation-error {
-    border-color: var(--pico-del-color, #b3261e) !important;
-    background-color: color-mix(in srgb, var(--pico-del-color, #b3261e) 6%, transparent);
+    border-color: var(--bs-danger, #dc3545) !important;
+    background-color: rgba(220, 53, 69, 0.06);
 }
 
 /* ---- Alerts (solver failure, export-error banners) ----------------- */
 
-.alert {
-    padding: 0.75rem 1rem;
-    border: 1px solid transparent;
-    border-radius: var(--pico-border-radius);
-    margin-bottom: 1.5rem;
-}
-
-.alert-warning {
-    color: #7a4d00;
-    background-color: #fff4d6;
-    border-color: #f2d98a;
-}
-
-.alert-error {
-    color: #b3261e;
-    background-color: #fdecea;
-    border-color: #f5c2be;
-}
+/*
+   The existing markup emits `.alert`, `.alert-warning`, and `.alert-danger`
+   which Bootstrap already styles. We only add a small typography helper
+   for the internal `.alert__message` and `.alert__hint` elements.
+*/
 
 .alert__message {
     margin: 0.5rem 0 0.25rem 0;
@@ -226,130 +225,30 @@ a.btn-secondary {
     opacity: 0.85;
 }
 
-@media (prefers-color-scheme: dark) {
-    .alert-warning {
-        color: #ffd682;
-        background-color: #3a2d00;
-        border-color: #6b5300;
-    }
-    .alert-error {
-        color: #ffb0a8;
-        background-color: #3a0f0b;
-        border-color: #6b1e18;
-    }
-}
-
-/* ---- Monthly schedule editor (design §13.2) ------------------------- */
-
-.monthly-schedule-editor {
-    margin: 0.75rem 0 1rem 0;
-}
-
-.schedule-mode-toggle {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-}
-
-.schedule-mode-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.25rem 0.5rem;
-    border: 1px solid transparent;
-    border-radius: var(--pico-border-radius);
-    color: var(--pico-muted-color);
-    font-weight: 500;
-    cursor: pointer;
-    margin-bottom: 0;
-}
-
-.schedule-mode-label.active-label {
-    color: var(--pico-primary);
-    background-color: var(--pico-primary-background);
-    border-color: var(--pico-primary-border);
-    color: var(--pico-primary-inverse);
-}
-
-.schedule-subform {
-    padding: 0.5rem 0.75rem;
-    border: 1px solid transparent;
-    border-radius: var(--pico-border-radius);
-}
-
-.schedule-subform--active {
-    background-color: var(--pico-card-sectioning-background-color, var(--pico-background-color));
-    border-color: var(--pico-muted-border-color);
-}
-
-.schedule-monthly-grid {
-    border: 0;
-    padding: 0;
-    margin: 0;
-}
-
-.schedule-monthly-grid__row {
-    display: grid;
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 0.375rem;
-    margin-bottom: 0.5rem;
-}
-
-.schedule-monthly-grid__cell {
-    max-width: none;
-    margin-bottom: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.schedule-monthly-grid__cell input[type="number"] {
-    width: 100%;
-    padding: 0.25rem 0.375rem;
-    font-size: 0.9375rem;
-    margin-bottom: 0;
-}
-
-.form-label--month {
-    font-size: 0.8125rem;
-    color: var(--pico-muted-color);
-    margin-bottom: 0.125rem;
-    font-weight: 500;
-}
-
-.schedule-monthly-grid__error:empty {
-    display: none;
-}
-
-.schedule-monthly-grid__error {
-    font-size: 0.8125rem;
-}
-
 /* ---- Tabbed inputs form (Index.cshtml) ------------------------------
 
    Eight `<input type="radio" name="__tab" class="tab-radio">` inputs are
    rendered as siblings of the eight `<section class="tab-panel">` panels
-   inside the form. The radios are visually hidden but remain keyboard-
-   focusable, so users can arrow through them; each label acts as the
-   clickable tab affordance.
+   inside the form. Radios are visually hidden but keyboard-focusable.
+   Labels look like Bootstrap's .nav-tabs items and are the clickable
+   affordance. `#tab-N:checked ~ #panel-X` reveals exactly one panel.
 
-   `#tab-N:checked ~ #panel-X` sibling selectors reveal exactly one panel
-   at a time. Every panel remains in the DOM so a single submit posts all
-   fields to /Forecast/Calculate — no per-tab navigation buttons, no JS.
+   The panel selectors use `~` (general sibling) so the radios and the
+   panels must share a common parent (the <form> in our case) — which they
+   do. All panels stay in the DOM so a single submit posts every field.
    ------------------------------------------------------------------- */
 
 .tab-radio {
-    /* Off-screen but focusable (Pico's visually-hidden pattern). */
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+    /* Off-screen but focusable (Bootstrap's .visually-hidden pattern). */
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
 }
 
 .tab-nav {
@@ -358,7 +257,7 @@ a.btn-secondary {
     gap: 0.25rem;
     margin: 0 0 1.5rem 0;
     padding: 0;
-    border-bottom: 1px solid var(--pico-muted-border-color);
+    border-bottom: 1px solid var(--bs-border-color);
 }
 
 .tab-nav__label {
@@ -367,10 +266,10 @@ a.btn-secondary {
     margin: 0;
     border: 1px solid transparent;
     border-bottom: none;
-    border-top-left-radius: var(--pico-border-radius);
-    border-top-right-radius: var(--pico-border-radius);
+    border-top-left-radius: var(--bs-border-radius);
+    border-top-right-radius: var(--bs-border-radius);
     cursor: pointer;
-    color: var(--pico-muted-color);
+    color: var(--bs-secondary-color);
     background-color: transparent;
     font-weight: 500;
     user-select: none;
@@ -378,15 +277,16 @@ a.btn-secondary {
        "attached" to its panel. */
     position: relative;
     top: 1px;
+    transition: color .15s ease-in-out, background-color .15s ease-in-out;
 }
 
 .tab-nav__label:hover {
-    color: var(--pico-color);
-    background-color: var(--pico-card-sectioning-background-color, var(--pico-background-color));
+    color: var(--bs-primary, #0d6efd);
+    background-color: rgba(13, 110, 253, 0.06);
 }
 
 .tab-nav__label--errored {
-    color: var(--pico-del-color, #b3261e);
+    color: var(--bs-danger, #dc3545);
 }
 
 .tab-nav__label--errored::after {
@@ -419,10 +319,10 @@ a.btn-secondary {
 #tab-6:checked ~ .tab-nav label[for="tab-6"],
 #tab-7:checked ~ .tab-nav label[for="tab-7"],
 #tab-8:checked ~ .tab-nav label[for="tab-8"] {
-    background-color: var(--pico-card-background-color);
-    color: var(--pico-primary);
-    border-color: var(--pico-muted-border-color);
-    border-bottom-color: var(--pico-card-background-color);
+    background-color: var(--bs-body-bg);
+    color: var(--bs-primary, #0d6efd);
+    border-color: var(--bs-border-color);
+    border-bottom-color: var(--bs-body-bg);
 }
 
 /* Keyboard focus indicator on the label associated with the focused radio. */
@@ -434,12 +334,10 @@ a.btn-secondary {
 #tab-6:focus-visible ~ .tab-nav label[for="tab-6"],
 #tab-7:focus-visible ~ .tab-nav label[for="tab-7"],
 #tab-8:focus-visible ~ .tab-nav label[for="tab-8"] {
-    outline: 2px solid var(--pico-primary);
+    outline: 0.25rem solid rgba(13, 110, 253, 0.25);
     outline-offset: 2px;
 }
 
-/* Panels' first heading looks slightly less shouty since the tab already
-   announces which section is active. */
 .tab-panel > h2:first-of-type {
     margin-top: 0;
 }
@@ -457,6 +355,92 @@ a.btn-secondary {
     border: 0;
 }
 
+/* ---- Monthly schedule editor (design §13.2) ------------------------- */
+
+.monthly-schedule-editor {
+    margin: 0.75rem 0 1rem 0;
+}
+
+.schedule-mode-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.schedule-mode-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid transparent;
+    border-radius: var(--bs-border-radius);
+    color: var(--bs-secondary-color);
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.schedule-mode-label.active-label {
+    color: #fff;
+    background-color: var(--bs-primary, #0d6efd);
+    border-color: var(--bs-primary, #0d6efd);
+}
+
+.schedule-subform {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid transparent;
+    border-radius: var(--bs-border-radius);
+}
+
+.schedule-subform--active {
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border-color: var(--bs-border-color);
+}
+
+.schedule-monthly-grid {
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.schedule-monthly-grid__row {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0.375rem;
+    margin-bottom: 0.5rem;
+}
+
+.schedule-monthly-grid__cell {
+    max-width: none;
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-monthly-grid__cell input[type="number"] {
+    width: 100%;
+    padding: 0.25rem 0.375rem;
+    font-size: 0.9375rem;
+    margin-bottom: 0;
+}
+
+.form-label--month {
+    font-size: 0.8125rem;
+    color: var(--bs-secondary-color);
+    margin-bottom: 0.125rem;
+    font-weight: 500;
+}
+
+.schedule-monthly-grid__error:empty {
+    display: none;
+}
+
+.schedule-monthly-grid__error {
+    font-size: 0.8125rem;
+}
+
 /* ---- Results page: hero, summary (design §13.3) --------------------- */
 
 .results-hero__grid {
@@ -467,16 +451,16 @@ a.btn-secondary {
 
 .results-hero__card {
     padding: 1rem 1.25rem;
-    border: 1px solid var(--pico-primary-border);
-    border-radius: var(--pico-border-radius);
-    background-color: var(--pico-primary-background);
-    color: var(--pico-primary-inverse);
+    border: 1px solid var(--bs-primary, #0d6efd);
+    border-radius: var(--bs-border-radius);
+    background-color: var(--bs-primary, #0d6efd);
+    color: #fff;
 }
 
 .results-hero__label {
     font-size: 0.875rem;
     font-weight: 500;
-    opacity: 0.85;
+    opacity: 0.9;
     margin-bottom: 0.25rem;
 }
 
@@ -502,13 +486,13 @@ a.btn-secondary {
 }
 
 .summary-grid dt {
-    color: var(--pico-muted-color);
+    color: var(--bs-secondary-color);
     font-weight: 500;
 }
 
 .summary-grid dd {
     margin: 0;
-    color: var(--pico-color);
+    color: var(--bs-body-color);
     font-variant-numeric: tabular-nums;
 }
 
@@ -518,8 +502,8 @@ a.btn-secondary {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
-    border-radius: var(--pico-border-radius);
-    border: 1px solid var(--pico-muted-border-color);
+    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--bs-border-color);
 }
 
 .forecast-table {
@@ -532,18 +516,18 @@ a.btn-secondary {
 .forecast-table th,
 .forecast-table td {
     padding: 0.375rem 0.625rem;
-    border-bottom: 1px solid var(--pico-muted-border-color);
+    border-bottom: 1px solid var(--bs-border-color);
     text-align: right;
     font-variant-numeric: tabular-nums;
-    background-color: var(--pico-card-background-color);
+    background-color: var(--bs-body-bg);
 }
 
 .forecast-table thead th {
     text-align: right;
     font-weight: 600;
-    color: var(--pico-color);
-    background-color: var(--pico-card-sectioning-background-color, var(--pico-background-color));
-    border-bottom: 2px solid var(--pico-muted-border-color);
+    color: var(--bs-body-color);
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+    border-bottom: 2px solid var(--bs-border-color);
     position: sticky;
     top: 0;
     z-index: 2;
@@ -556,14 +540,14 @@ a.btn-secondary {
     left: 0;
     text-align: left;
     font-weight: 600;
-    border-right: 1px solid var(--pico-muted-border-color);
+    border-right: 1px solid var(--bs-border-color);
     z-index: 1;
-    background-color: var(--pico-card-background-color);
+    background-color: var(--bs-body-bg);
 }
 
 /* Top-left header cell above both stickies. */
 .forecast-table thead th:first-child {
-    background-color: var(--pico-card-sectioning-background-color, var(--pico-background-color));
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
     z-index: 3;
 }
 
@@ -571,5 +555,5 @@ a.btn-secondary {
 .forecast-table tbody tr:nth-child(even) td,
 .forecast-table tbody tr:nth-child(even) th:first-child,
 .forecast-table tbody tr:nth-child(even) td:first-child {
-    background-color: color-mix(in srgb, var(--pico-muted-border-color) 30%, var(--pico-card-background-color));
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
 }
