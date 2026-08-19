@@ -15,6 +15,7 @@ Inputs are captured through a server-rendered form. All calculations run inside 
 - [Cash-flow sign conventions](#cash-flow-sign-conventions)
 - [Constant and Variable input modes](#constant-and-variable-input-modes)
 - [Project organization](#project-organization)
+- [Frontend styling](#frontend-styling)
 - [Installing .NET 10](#installing-net-10)
 - [Restore, build, run, debug, test — `dotnet` CLI](#restore-build-run-debug-test--dotnet-cli)
 - [Working in VS Code](#working-in-vs-code)
@@ -359,7 +360,11 @@ unitization-app/
 │   │   ├── Views/                           # Index.cshtml, Results.cshtml, partials
 │   │   ├── ViewModels/
 │   │   ├── ModelBinders/                    # MonthlyScheduleModelBinder
-│   │   ├── wwwroot/css/site.css             # local styles (no CDN, no Bootstrap)
+│   │   ├── wwwroot/
+│   │   │   └── css/
+│   │   │       ├── site.css                 # app-specific styles (tabs, cards, table, hero)
+│   │   │       └── vendor/
+│   │   │           └── bootstrap.min.css    # Bootstrap 5.3.3 (MIT), vendored — no CDN, no JS bundle
 │   │   ├── Program.cs
 │   │   └── appsettings.json
 │   └── RehearsalForecast.Core/              # Pure calculation library — no ASP.NET Core dependency
@@ -385,6 +390,36 @@ unitization-app/
 ```
 
 `RehearsalForecast.Core` depends only on the .NET base class library. The web project references `RehearsalForecast.Core`; nothing depends on the web project. The test project references `RehearsalForecast.Core` and no other production project.
+
+---
+
+## Frontend styling
+
+The web app uses **Bootstrap 5.3.3** as its base CSS framework, vendored locally at `src/RehearsalForecast.Web/wwwroot/css/vendor/bootstrap.min.css`. Application-specific styling lives in `wwwroot/css/site.css`, which loads after Bootstrap and layers on top of it.
+
+Two design constraints shape how Bootstrap is integrated:
+
+- **No CDN.** The `bootstrap.min.css` file is committed to the repository and served from the app's own `wwwroot/`. Nothing is fetched at runtime from an external host.
+- **No client-side JavaScript.** The Bootstrap JS bundle is not loaded. Every interactive UI element on the site is either server-rendered or driven by pure CSS — most notably the eight-tab input page, which uses hidden radio buttons plus `:checked ~` sibling selectors to swap panels without any script.
+
+What Bootstrap provides directly:
+
+- Typography, focus rings, and light/system color defaults.
+- Buttons (`.btn`, `.btn-primary`, `.btn-outline-secondary`).
+- Native `<input>`/`<select>`/`<textarea>` styling — aliased in `site.css` via attribute selectors so the ~50 form fields don't need `class="form-control"` sprinkled on every element.
+- Alerts (`.alert`, `.alert-warning`, `.alert-danger`).
+- The `.container` and `.navbar` chrome used in `_Layout.cshtml`.
+
+What `site.css` adds on top:
+
+- The eight-tab input page: `.tab-radio`, `.tab-nav`, `.tab-nav__label`, `.tab-panel`, and the `#tab-N:checked ~ #panel-X` reveal rules. Panels with validation errors get badged with `.tab-nav__label--errored` and the earliest errored panel is auto-selected server-side.
+- Section cards (`.section`) that wrap each input tab and each results block.
+- The results hero (`.results-hero__*`) and summary grid (`.summary-grid`) used on the results page.
+- The sticky-header, sticky-first-column 36-row forecast table (`.forecast-table`, `.table-scroll`).
+- The Constant / Variable monthly schedule editor (`.schedule-mode-*`, `.schedule-monthly-grid__*`).
+- Validation summary styling (`.validation-summary`, `.field-validation-error`, `.input-validation-error`).
+
+Because `site.css` consumes Bootstrap's CSS custom properties (`--bs-primary`, `--bs-body-color`, `--bs-border-color`, `--bs-tertiary-bg`, etc.) rather than hard-coding colors, any Bootstrap theme swap (or setting `data-bs-theme="dark"` on `<html>`) propagates through the app-specific styles automatically.
 
 ---
 
